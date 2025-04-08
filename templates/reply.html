@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>chitchan</title>
+  <!-- Import Google Icon Font -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Import Materialize CSS -->
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='materialize/css/materialize.min.css') }}" media="screen,projection"/>
+  <!-- Viewport for Mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+<body class="container">
+
+  <!-- Import jQuery and Materialize JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="{{ url_for('static', filename='materialize/js/materialize.min.js') }}"></script>
+
+  <h4 class="center-align">Reply to Post</h4>
+
+  <form method="POST" action="/{{ board }}/post_reply/{{ post[0] }}" enctype="multipart/form-data">
+    <div class="input-field">
+      <input type="text" name="name" id="name">
+      <label for="name">Name</label>
+    </div>
+    <div class="file-field input-field">
+      <div class="btn">
+        <span>Image</span>
+        <input type="file" name="image">
+      </div>
+      <div class="file-path-wrapper">
+        <input class="file-path validate" type="text">
+      </div>
+    </div>
+    <div class="input-field">
+      <textarea id="post_text" name="post_text" class="materialize-textarea"></textarea>
+      <label for="post_text">Post</label>
+    </div>
+    <button class="btn waves-effect waves-light" type="submit">Post</button>
+  </form>
+
+  <div class="card blue-grey darken-1">
+    <div class="card-content white-text">
+      {% if post[1] %}
+      <a href="{{ url_for('static', filename='uploads/' + post[1]) }}">
+        <img style="width:100px;" src="{{ url_for('static', filename='uploads/' + post[1]) }}">
+      </a>
+      {% endif %}
+      <p><strong>User:</strong> {{ post[2] }}</p>
+      <p><strong>Date:</strong> {{ post[3] }}</p>
+      <p><strong>Post:</strong> {{ post[5] }}</p>
+    </div>
+  </div>
+
+  {% for reply in replies %}
+  <div class="card">
+    <div class="card-content">
+      {% if reply[0] %}
+      <a href="{{ url_for('static', filename='uploads/' + reply[0]) }}">
+        <img style="width:100px;" src="{{ url_for('static', filename='uploads/' + reply[0]) }}">
+      </a>
+      {% endif %}
+      <p><strong>User:</strong> {{ reply[1] }}</p>
+      <p><strong>Date:</strong> {{ reply[2] }}</p>
+      <p><strong>Reply:</strong> {{ reply[4] }}</p>
+    </div>
+  </div>
+  {% endfor %}
+
+</body>
+</html>
