@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChitChan</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <style>
+    body {
+      background-color: #fff8e1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    main {
+      flex: 1;
+    }
+
+    .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .logo img {
+      height: 48px;
+      width: 48px;
+      border-radius: 8px;
+      filter: grayscale(1) brightness(1.1);
+      transition: transform 0.2s ease;
+    }
+
+    .logo img:hover {
+      transform: rotate(-5deg) scale(1.05);
+    }
+
+    .logo h4 {
+      margin: 0;
+      color: #b71c1c;
+      font-weight: 600;
+    }
+
+    .board-section {
+      background: white;
+      border: 1px solid #d32f2f;
+      padding: 20px;
+      margin-bottom: 30px;
+      margin-top: 40px; /* <-- Added space between logo and board section */
+    }
+
+    .popular-section {
+      background: white;
+      border: 1px solid #d32f2f;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      color: #d32f2f;
+      font-weight: bold;
+      font-size: 20px;
+      border-bottom: 1px solid #d32f2f;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+
+    .board-column ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .board-column li a {
+      color: #000;
+      font-size: 14px;
+    }
+
+    .board-column strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    footer {
+      background-color: #fbe9e7;
+      color: #b71c1c;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 14px;
+      border-top: 1px solid #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <!-- Logo and Title -->
+    <div class="logo">
+      <img src="/static/logo.jpg" alt="ChitChan Logo">
+      <h4>ChitChan</h4>
+    </div>
+
+    <!-- Boards Section -->
+    <div class="container board-section z-depth-1">
+      <div class="section-title">Boards</div>
+      <div class="row">
+        {% set categories = {} %}
+        {% for board in boards %}
+          {% set cat = board.category if board.category else 'Misc' %}
+          {% if cat not in categories %}
+            {% set _ = categories.update({cat: []}) %}
+          {% endif %}
+          {% set _ = categories[cat].append(board) %}
+        {% endfor %}
+
+        {% for category, boards_list in categories.items() %}
+          <div class="col s12 m6 l3 board-column">
+            <strong>{{ category }}</strong>
+            <ul>
+              {% for board in boards_list %}
+                <li><a href="/{{ board.short_name }}">/{{ board.short_name }}/ - {{ board.full_name }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Popular Threads Section -->
+    <div class="container popular-section z-depth-1">
+      <div class="section-title">Popular Threads</div>
+      <div class="row">
+        {% for thread in popular_threads %}
+          <div class="col s12 m3">
+            <div class="card small">
+              <div class="card-image">
+                <img src="/static/uploads/{{ thread.image_file or 'placeholder.jpg' }}">
+              </div>
+              <div class="card-content">
+                <span class="card-title">/{{ thread.board }}/</span>
+                <p>{{ thread.post_text[:60] }}...</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    © 2025 ChitChan. All rights reserved.
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>
