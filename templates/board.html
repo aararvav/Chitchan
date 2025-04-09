@@ -49,17 +49,17 @@
     {% for post in posts %}
     <div class="card">
       <div class="card-content">
-        {% if post[1] %}
-        <a href="{{ url_for('static', filename='uploads/' + post[1]) }}">
-          <img style="width:100px;" src="{{ url_for('static', filename='uploads/' + post[1]) }}">
+        {% if post.image_file %}
+        <a href="{{ url_for('static', filename='uploads/' + post.image_file) }}">
+          <img style="width:100px;" src="{{ url_for('static', filename='uploads/' + post.image_file) }}">
         </a>
         {% endif %}
-        <p><strong>User:</strong> {{ post[2] }}</p>
-        <p><strong>Date:</strong> {{ post[3] }}</p>
-        <p><strong>Post:</strong> {{ post[5] }}</p>
+        <p><strong>User:</strong> {{ post.user }}</p>
+        <p><strong>Date:</strong> {{ post.date }}</p>
+        <p><strong>Post:</strong> {{ post.post_text }}</p>
       </div>
       <div class="card-action">
-        <a href="/{{ board }}/reply/{{ post[0] }}">Reply</a>
+        <a href="/{{ board }}/reply/{{ post.post_id }}">Reply</a>
       </div>
     </div>
     {% endfor %}
