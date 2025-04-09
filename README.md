@@ -51,4 +51,4 @@ sqlite3 chitchan.db
  python server.py
 ```
 
-
+### i miss her
