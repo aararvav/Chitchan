@@ -51,4 +51,4 @@ sqlite3 chitchan.db
  python server.py
 ```
 
-### i miss her
+### install this from github.com/DivyanshVerma0/Chitchan
