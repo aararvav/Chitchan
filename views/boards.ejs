@@ -1,0 +1,113 @@
+<%- include('partials/header') %>
+
+<body class="boards-body">
+    <%- include('partials/board-nav') %>
+    <div class="board-banner">
+        <div id="banner-container">
+            <img src="" id="banner-img">
+        </div>
+        <div id="board-title">/<%= board.slug %>/ - <%= board.name %></div>
+    </div>
+    <hr class="ninety">
+
+    <div>Ad goes here</div>
+
+    <hr class="below-title">
+    
+    <div class="post-form">
+        <div id="post-form-toggle">[<a href="#">Start a New Thread</a>]</div>
+        <div id="boardForm">
+            <form action="/board/<%= board.slug %>/thread" method="post" id="post-thread-form" style="display: none;">
+                <div class="inputField">
+                    <div class="label">Name</div>
+                    <input type="text" name="name" placeholder="Anonymous">
+                </div>
+                <div class="inputField">
+                    <div class="label">Options</div>
+                    <input type="text" name="options">
+                </div>
+                <div class="inputField">
+                    <div class="label">Subject</div>
+                    <input type="text" name="subject" required>
+                    <button type="submit">Post</button>
+                </div>
+                <div class="inputField">
+                    <div class="label" id="boardComment">Comment</div>
+                    <textarea name="comment" id="comment" cols="48" rows="4" wrap="soft" required></textarea>
+                </div>
+                <div class="inputField">
+                    <div class="label" id="boardFile">File</div>
+                    <input type="text" name="upfile" placeholder="Image URL">
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="board-announcment">
+        <hr class="short-length">
+        <p>1/5/2017 - Remember to read the rules you dummies.</p>
+        <hr class="short-length">
+    </div>
+    
+    <!--display each thread from this board, make a seperate file for this ? -->
+    <% threads.forEach(function(thread){%>
+        <hr>
+        <section class="thread-container id-<%= thread.id %> clearfix">
+                <span class="hideIcon"><img src="/assets/img/tools/expand.png"></span>
+                <div class="thread">
+                    <div class="threadThumbnail">
+                        <a class="threadImg-big" href="<%= thread.file %>">
+                            <img class="threadImg" src="<%= thread.file %>" title="Click to enlarge image.">
+                        </a>
+                    </div>
+                    <span id="thread-title"><%= thread.subject %></span>
+                    <span id="thread-author"><%= thread.author %></span>
+                    <span id="thread-date"><%= thread.createdAt %></span>
+                    <span id="thread-id">No.<%= thread.id %></span>
+                    <blockquote id="thread-message" class="comment"><%= thread.comment %></blockquote>
+                    <span class="summary"><a href="/board/<%= board.slug %>/thread/<%= thread.id %>">Click here</a> to view thread.</span>
+                     <!-- Begin comments-->
+                    <div class = "reply-container">
+                        <% thread.comments.reverse().forEach(function(reply){ %>
+                            <span class="sideArrow">>>>&nbsp;</span>
+                            <div class="reply">
+                                <div class="comment-info">
+                                    <span id="thread-author"><%= reply.author %>&nbsp;</span>
+                                    <span><i><%= reply.createAt %></i>&nbsp;</span>
+                                    <span>No.<%= reply.id %>&nbsp;</span>
+                                </div>
+                                <% if(!(reply.file === null)) { %>
+                                    <div class="threadThumbnail commentThumbnail">
+                                        <a class="threadImg-big" href="<%= reply.file %>">
+                                            <img class="threadImg" src="<%= reply.file %>" title="Click to enlarge image.">
+                                        </a>
+                                    </div>
+                                <% } %>
+                                <blockquote class="comment"><%= reply.comment %> &nbsp;</blockquote>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+        </section>
+
+    <% }); %>
+    <hr>
+    <hr>
+    <div class="pagelist desktop">
+        <div class="pages">
+            <% for(var i = 1; i <= pagination.totalPages; i++) { %>
+                [<a href="<%= i %>" <%= i === pagination.currentPage ? 'class="current"' : '' %>><%= i %></a>]
+            <% } %>
+        </div>
+        <% if (pagination.nextPage) { %>
+            <div class="next">
+                <form class="pageSwitcherForm" action="<%= pagination.nextPage %>">
+                    <input type="submit" value="Next" accesskey="x">
+                </form>
+            </div>
+        <% } %>
+    </div>
+    <br>
+    <script src="/assets/js/boards-main.js"></script>
+</body>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,127 @@
+.boards-body{
+    font-family: arial,helvetica,sans-serif;
+    font-size: 10pt!important;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.board-announcment{
+    font-size: 11px;
+    width: 468px;
+    margin: auto;
+    text-align: left;
+}
+
+#board-navigation{
+    font-size: 9pt;
+    color: #B86;
+}
+#board-navigation a{
+    font-weight: normal;
+    padding: 1px;
+    text-decoration: none;
+    color: #800000;
+}
+.boards-list{
+    float:left;
+}
+.right-nav{
+    float:right;
+}
+.board-banner{
+    text-align: center;
+    clear: both;
+}
+#banner-container{
+    border: 1px solid #800;
+    margin: 5px auto;
+    width: 300px;
+    height: 100px;
+    max-width: 100%;
+}
+#board-title{
+    font-family: Tahoma,sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: -2px;
+    margin-top: 0;
+}
+#post-form-toggle{
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#post-form-toggle a {
+    text-decoration: none;
+}
+
+div.pagelist {
+    font-size: 13px!important;
+    margin: 0;
+    padding: 3px 7px;
+    float: left;
+    border: none;
+    background: #F0E0D6;
+    border-right: 1px solid #D9BFB7;
+    border-bottom: 1px solid #D9BFB7;
+    list-style: none;
+    overflow: hidden;
+    color: #B86;
+}
+
+div.pagelist div.pages {
+    padding: 4px;
+}
+
+div.pagelist strong {
+    color: #800000;
+}
+
+div.pagelist div.pages a {
+    text-decoration: none!important;
+}
+
+div.pagelist>div {
+    float: left;
+}
+
+div.pagelist form {
+    display: inline;
+}
+
+#boardForm, #threadForm{
+    width: 468px;
+    margin: 0 auto;
+}
+
+#boardForm .inputField, #threadForm .inputField{
+    text-align: left;
+    height: auto;
+    margin-bottom: 2px;
+}
+
+.inputField .label{
+    background-color: #EA8;
+    color: #800;
+    font-weight: bold;
+    border: 1px solid #800;
+    padding: 1px 5px;
+    font-size: 10pt;
+    float: left;
+    width: 78px;
+    margin-right: 2px;
+}
+.inputField #boardComment{
+    padding: 22px 5px;
+}
+.inputField #boardFile{
+    margin-top: -5px;
+}
+.inputField>input[type=text] {
+    width: 244px;
+    margin-right: 2px;
+}
