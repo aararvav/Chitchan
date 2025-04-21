@@ -1,6 +1,5 @@
 /* 
- * Project Name: 4chan NodeJS
- * Written by Daniel <daniel.reguero@hotmail.com>
+ chitchan
  */
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -16,11 +15,62 @@ const Comments = require("./models/comments");
 
 const app = express();
 
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+        },
+    },
+    crossOriginEmbedderPolicy: true,
+    crossOriginOpenerPolicy: true,
+    crossOriginResourcePolicy: { policy: "same-site" },
+    dnsPrefetchControl: true,
+    frameguard: { action: "deny" },
+    hidePoweredBy: true,
+    hsts: true,
+    ieNoOpen: true,
+    noSniff: true,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    xssFilter: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
+
+// Stricter rate limits for post endpoints
+const postLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 20, // Limit each IP to 20 posts per hour
+    message: 'Too many posts from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+app.use('/board/:slug/thread*', postLimiter);
+
 // Basic middleware
-app.use('/assets', express.static(__dirname + "/public"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/assets', express.static(__dirname + "/public", {
+    maxAge: '1d',
+    etag: true
+}));
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.set('view engine', 'ejs');
+app.set('trust proxy', 1);
 
 // Initialize database and start server
 async function initializeApp() {
