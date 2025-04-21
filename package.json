@@ -32,5 +32,18 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
-  // ... rest of the file ...
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HappyZombies/chitchan-nodejs.git"
+  },
+  "keywords": [
+    "chitchan",
+    "nodejs"
+  ],
+  "author": "Daniel Reguero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HappyZombies/chitchan-nodejs/issues"
+  },
+  "homepage": "https://github.com/HappyZombies/chitchan-nodejs#readme"
 }
