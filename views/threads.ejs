@@ -16,81 +16,84 @@
     
     <div class="post-form">
         <div id="post-form-toggle">[<a href="">Post a Reply</a>]</div>
-        <!--4chans 'form' is a table, so I made my own version of it cuz I ain't touching that-->
-       <div id="threadForm">
-            <form action="/board/<%= board.slug %>/thread/<%=thread.id%>" style="display: none;" id="post-thread-form" method="post">
+        <% if (locals.errors) { %>
+            <div class="error-messages">
+                <% errors.forEach(function(error) { %>
+                    <div class="error"><%= error.message %></div>
+                <% }); %>
+            </div>
+        <% } %>
+        <div id="threadForm">
+            <form action="/board/<%= board.slug %>/thread/<%=thread.id%>" method="post" style="display: none;" id="post-thread-form" enctype="multipart/form-data">
                 <div class="inputField">
-                    <div for="name" class="label">Name</div><input type="text" name="name" placeholder="Anonymous">
+                    <div class="label">Name</div>
+                    <input type="text" name="name" placeholder="Anonymous" maxlength="50">
                 </div>
                 <div class="inputField">
-                    <div for="options" class="label">Options</div><input type="text" name="options"><button type="submit">Post</button>
+                    <div class="label" id="boardComment">Comment</div>
+                    <textarea name="comment" id="comment" cols="48" rows="4" wrap="soft" required maxlength="2000"></textarea>
                 </div>
                 <div class="inputField">
-                    <div for="comment" class="label" id="boardComment">Comment</div><textarea name="comment" id="comment" cols="48" rows="4" wrap="soft" tabindex="4"></textarea>
+                    <div class="label" id="boardFile">File</div>
+                    <input type="file" name="file" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <div class="file-info">Max file size: 5MB. Allowed types: JPEG, PNG, GIF, WEBP</div>
                 </div>
-                <!--<div>
-                    <label for="verification">Verification</label><div></div>
-                </div>-->
                 <div class="inputField">
-                    <div for="file" class="label" id="boardFile">File</div><input type="file" name="upfile">
+                    <button type="submit">Post Reply</button>
                 </div>
             </form>
         </div>
     </div>
-    <div class="board-announcment">
-        <hr class="short-length">
-        <p>1/5/2017 - Remember to read the rules you dummies.</p>
-        <hr class="short-length">
-    </div>
-    
-    <!--display each thread from this board, make a seperate file for this ? -->
-        <div class="thread-tools" style="text-align:left">
-            [<a href="../">Return</a>]
-        </div>
-        <hr>
-        <section class="thread-container id-<%= thread.id %> clearfix">
-                <!--<span class="hideIcon"><img src="/assets/img/tools/expand.png"></span>-->
-                <div class="thread">
-                    <% if(thread.file && thread.file !== 'https://s.4cdn.org/image/fp/logo-transparent.png') { %>
-                        <div class="threadThumbnail">
-                            <a class="threadImg-big" href="<%= thread.file %>">
-                                <img class="threadImg" src="<%= thread.file %>" title="Click to enlarge image.">
-                            </a>
-                        </div>
-                    <% } %>
-                    <span id="thread-title"><%= thread.subject %></span>
-                    <span id="thread-author"><%= thread.author %></span>
-                    <span id="thread-date"><%= thread.createdAt %></span>
-                    <span id="thread-id">No.<%= thread.id %></span>
-                    <blockquote id="thread-message" class="comment"><%= thread.comment %></blockquote>
-                     <!-- Begin comments-->
-                    <div class = "reply-container">
-                        <% thread.comments.forEach(function(reply){ %>
-                            <span class="sideArrow">>>>&nbsp;</span>
-                            <div class="reply">
-                                <div class="comment-info">
-                                    <span id="thread-author"><%= reply.author %>&nbsp;</span>
-                                    <span><i><%= reply.createAt %></i>&nbsp;</span>
-                                    <span>No.<%= reply.id %>&nbsp;</span>
-                                </div>
-                                <% if(reply.file && reply.file !== 'null' && reply.file !== 'https://s.4cdn.org/image/fp/logo-transparent.png') { %>
-                                    <div class="threadThumbnail commentThumbnail">
-                                        <a class="threadImg-big" href="<%= reply.file %>">
-                                            <img class="threadImg" src="<%= reply.file %>" title="Click to enlarge image.">
-                                        </a>
-                                    </div>
-                                <% } %>
-                                <blockquote class="comment"><%= reply.comment %> &nbsp;</blockquote>
-                            </div>
-                        <% }); %>
-                    </div>
+
+    <div class="thread">
+        <div class="op-post">
+            <div class="post-header">
+                <span class="subject"><%= thread.subject %></span>
+                <span class="author"><%= thread.author %></span>
+                <span class="date"><%= new Date(thread.createdAt).toLocaleString() %></span>
+                <span class="post-number">No.<%= thread.id %></span>
+            </div>
+            <% if (thread.file) { %>
+                <div class="file-info">
+                    File: <a href="/assets/uploads/<%= thread.file %>" target="_blank"><%= thread.file %></a>
+                    (<%= Math.round(thread.fileSize / 1024) %>KB, <%= thread.fileWidth %>x<%= thread.fileHeight %>)
                 </div>
-        </section>
+                <div class="file-thumb">
+                    <a href="/assets/uploads/<%= thread.file %>" target="_blank">
+                        <img src="/assets/uploads/<%= thread.thumbnail %>" alt="thumbnail">
+                    </a>
+                </div>
+            <% } %>
+            <div class="comment"><%= thread.comment %></div>
+        </div>
 
-    <hr>
-    <hr>
-    <script src="/assets/js/boards-main.js"></script>
-    <script src="/assets/js/threads-main.js"></script>    
+        <% if (thread.comments && thread.comments.length > 0) { %>
+            <div class="replies">
+                <% thread.comments.forEach(function(comment) { %>
+                    <div class="reply" id="p<%= comment.id %>">
+                        <div class="post-header">
+                            <span class="author"><%= comment.author %></span>
+                            <span class="date"><%= new Date(comment.createdAt).toLocaleString() %></span>
+                            <span class="post-number">No.<%= comment.id %></span>
+                        </div>
+                        <% if (comment.file) { %>
+                            <div class="file-info">
+                                File: <a href="/assets/uploads/<%= comment.file %>" target="_blank"><%= comment.file %></a>
+                                (<%= Math.round(comment.fileSize / 1024) %>KB, <%= comment.fileWidth %>x<%= comment.fileHeight %>)
+                            </div>
+                            <div class="file-thumb">
+                                <a href="/assets/uploads/<%= comment.file %>" target="_blank">
+                                    <img src="/assets/uploads/<%= comment.thumbnail %>" alt="thumbnail">
+                                </a>
+                            </div>
+                        <% } %>
+                        <div class="comment"><%= comment.comment %></div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <p class="no-replies">No replies yet.</p>
+        <% } %>
+    </div>
 </body>
-
 <%- include('partials/footer') %>
