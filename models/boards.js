@@ -1,18 +1,22 @@
-var sequelize = require("../config/index").getSequelize();
-var Sequelize = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
+const sequelize = require("../config/index").getSequelize();
 
-var Boards = sequelize.define('boards', {
+class Boards extends Model {}
+
+Boards.init({
     name: {
-        type: Sequelize.STRING(150),
-        field: 'name',
+        type: DataTypes.STRING(150),
         allowNull: false
     },
     slug: {
-        type: Sequelize.STRING(150),
-        field: 'slug',
+        type: DataTypes.STRING(150),
         allowNull: false
     }
+}, {
+    sequelize,
+    modelName: 'boards',
+    tableName: 'boards'
 });
 
-Boards.sync();
+// Don't sync here - let the app.js handle syncing
 module.exports = Boards;
