@@ -9,11 +9,19 @@ var baseUrl = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split
 var imageLinks = document.querySelectorAll('.threadImg-big[href$=".png"],  .threadImg-big[href$=".jpg"],  .threadImg-big[href$=".gif"], .threadImg-big[href$=".bmp"], .threadImg-big[href$=".PNG"]');
 
 function randomBanner(){
-    //lol lazy
-    var images = new Array("1.gif", "2.gif", "3.gif", "4.gif", "5.gif", "6.gif");
-    var imageNum = Math.floor(Math.random() * images.length);
+    var currentBoard = window.location.pathname.split('/')[2]; // Get the board slug from URL
     var baseUrl = document.location.origin;
-    document.getElementById('banner-img').setAttribute('src', baseUrl+"/assets/img/board-titles/"+images[imageNum]);
+    
+    // If we're on /pol/ board, use 2.gif
+    if (currentBoard === 'pol') {
+        document.getElementById('banner-img').setAttribute('src', baseUrl + "/assets/img/board-titles/2.gif");
+        return;
+    }
+    
+    // For other boards, use random banner excluding 2.gif
+    var images = ["1.gif", "3.gif", "4.gif", "5.gif", "6.gif"];
+    var imageNum = Math.floor(Math.random() * images.length);
+    document.getElementById('banner-img').setAttribute('src', baseUrl + "/assets/img/board-titles/" + images[imageNum]);
 }
 
 window.onload = randomBanner();

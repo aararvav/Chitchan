@@ -74,29 +74,47 @@ module.exports = function(app, Boards, Threads, Comments){
             }
         }).then(function(board){
             if(board == null){
-                res.status(400).send({ error: 'Board Not Found!' });
-            }else{
-                 if(!isNaN(req.params.thread_id)){
-                    //threads are numbers.
-                    Threads.findById(req.params.thread_id, {include: [ {model: Comments, as: "comments", order: "createdAt ASC"}]}).then(function(thread){
-                        res.render('threads', {
-                            board: board, 
-                            thread: thread,
-                            boards: app.locals.boards || []
-                        });
-                    });
-                }else{
-                    res.status(400).send({ error: 'Thread Not Found!' });
-                }
+                res.status(404).send({ error: 'Board Not Found!' });
+                return;
             }
+            
+            const threadId = parseInt(req.params.thread_id, 10);
+            if(!isNaN(threadId)){
+                // Use findByPk and include Comments
+                Threads.findByPk(threadId, {
+                    include: [{ 
+                        model: Comments, 
+                        as: "comments", 
+                        order: [['createdAt', 'ASC']] // Order comments ascending
+                    }]
+                }).then(function(thread){
+                    if (thread === null) {
+                        res.status(404).send({ error: 'Thread Not Found!' });
+                        return;
+                    }
+                    // Render the thread view
+                    res.render('threads', {
+                        board: board, 
+                        thread: thread,
+                        boards: app.locals.boards || []
+                    });
+                }).catch(function(err){
+                    console.error('Error finding thread by PK:', err);
+                    res.status(500).send({ error: 'Error retrieving thread data.' });
+                });
+            }else{
+                res.status(400).send({ error: 'Invalid Thread ID!' });
+            }
+            
         }).catch(function(err){
+            console.error('Error finding board for thread view:', err);
             res.status(500).send({ error: 'Something went wrong!' });
         });
     });
 
     //Post methods.
     app.post('/board/:slug/thread', function(req, res){
-        console.log('Received thread creation request:', req.body);  // Debug log
+        console.log('Received thread creation request:', req.body);  // Debug log added
         
         Boards.findOne({
             where: {
@@ -105,74 +123,105 @@ module.exports = function(app, Boards, Threads, Comments){
         }).then(function(board){
             if(board == null){
                 res.status(400).send({ error: 'Board Not Found!' });
-                return;
+                return; 
             }
 
-            // Validate required fields
+            // Validate required fields - ADDED
             if(!req.body.subject || !req.body.comment){
-                console.log('Missing required fields:', req.body);  // Debug log
+                console.log('Missing required fields:', req.body);  // Debug log added
                 res.status(400).json({ error: 'Subject and comment are required!' });
                 return;
             }
 
-            // Create thread data
+            // Create thread data - FIXED
             var threadData = {
                 boardId: board.id,
-                subject: helpers.htmlEntities(req.body.subject),
-                author: req.body.name ? helpers.htmlEntities(req.body.name) : 'Anonymous',
+                subject: helpers.htmlEntities(req.body.subject), // Assuming helpers.htmlEntities exists and works
+                author: req.body.name ? helpers.htmlEntities(req.body.name) : 'Anonymous', // Use name field, default to Anonymous
                 comment: helpers.htmlEntities(req.body.comment),
-                file: req.body.upfile || 'https://s.4cdn.org/image/fp/logo-transparent.png'
+                file: req.body.upfile || 'https://s.4cdn.org/image/fp/logo-transparent.png' // Use upfile field, provide default
             };
 
-            console.log('Creating thread with data:', threadData);  // Debug log
+            console.log('Creating thread with data:', threadData); // Debug log added
 
             // Create the thread
             Threads.create(threadData).then(function(thread){
+                // Redirect to the new thread's page
                 res.redirect('/board/' + req.params.slug + '/thread/' + thread.id);
             }).catch(function(err){
-                console.error('Thread creation error:', err);
-                res.status(500).json({ error: 'Error creating thread' });
+                console.error('Thread creation error:', err); // Log error
+                res.status(500).json({ error: 'Error creating thread' }); // Send JSON error
             });
         }).catch(function(err){
-            console.error('Board find error:', err);
-            res.status(500).json({ error: 'Error finding board' });
+            console.error('Board find error:', err); // Log error
+            res.status(500).json({ error: 'Error finding board' }); // Send JSON error
         });
     });
 
     app.post('/board/:slug/thread/:thread_id', function(req, res){
-        //Let's still check if we are in the proper board 
+        console.log('Received comment creation request:', req.body); // Debug log
+        
+        // Find Board first (good practice, though slug isn't strictly needed for comment creation)
         Boards.findOne({
-            where: {
-                slug: req.params.slug
-            }
+            where: { slug: req.params.slug }
         }).then(function(board){
             if(board == null){
-                res.status(400).send({ error: 'Board Not Found!' });
-            }else{
-                 if(!isNaN(req.params.thread_id)){
-                    //threads are numbers.
-                    Threads.findById(req.params.thread_id).then(function(thread){
-                        if(thread === null){
-                            res.status(400).send({ error: 'Thread Not Found!' });                         
-                        }else{
-                            //Create a comment.
-                            Comments.create({
-                                    threadId: req.params.thread_id,
-                                    author: req.body.name,
-                                    comment: req.body.comment,
-                                    file: req.body.upfile
-                            }).then(function(comment){
-                                //After we create the new comment. Update the thread with the new create date FROM the comment.
-                                Threads.update({createdAt: comment.createdAt}, {where:{id: req.params.thread_id}});
-                                res.redirect(req.originalUrl);                                
-                            });
-                        }
-                    });
-                }else{
-                    res.status(400).send({ error: 'Thread Not Found!' });
-                }
+                res.status(404).send({ error: 'Board Not Found!' });
+                return;
             }
-        }).catch(function(err){
+
+            const threadId = parseInt(req.params.thread_id, 10);
+            if(!isNaN(threadId)){
+                // Find the thread to reply to
+                Threads.findByPk(threadId).then(function(thread){
+                    if(thread === null){
+                        res.status(404).send({ error: 'Thread Not Found!' });                         
+                        return;
+                    }
+                    
+                    // Validate required comment field
+                    if (!req.body.comment || req.body.comment.trim() === '') {
+                        console.log('Missing required comment field:', req.body); // Debug log
+                        // Redirect back with an error message (or render page with error)
+                        // For simplicity, redirecting here. A better UX would show error on the form.
+                        res.redirect(req.originalUrl + '?error=Comment is required'); 
+                        return;
+                    }
+
+                    // Create comment data
+                    const commentData = {
+                        threadId: threadId,
+                        author: req.body.name ? helpers.htmlEntities(req.body.name) : 'Anonymous',
+                        comment: helpers.htmlEntities(req.body.comment),
+                        // Ignoring file upload for now, set to null
+                        file: null 
+                        // file: req.body.upfile ? helpers.htmlEntities(req.body.upfile) : null // If using text input for URL
+                    };
+
+                    console.log('Creating comment with data:', commentData); // Debug log
+
+                    // Create the comment
+                    Comments.create(commentData).then(function(comment){
+                        // Don't update thread timestamp on reply
+                        // Threads.update({updatedAt: new Date()}, {where:{id: threadId}});
+                        
+                        // Redirect back to the thread page
+                        res.redirect(req.originalUrl);
+
+                    }).catch(function(err){ // Catch for Comments.create()
+                        console.error('Comment creation error:', err);
+                        res.status(500).send({ error: 'Error saving reply.' });
+                    });
+
+                }).catch(function(err){ // Catch for Threads.findByPk()
+                    console.error('Error finding thread for reply:', err);
+                    res.status(500).send({ error: 'Error finding thread.' });
+                });
+            } else {
+                res.status(400).send({ error: 'Invalid Thread ID!' });
+            }
+        }).catch(function(err){ // Catch for Boards.findOne()
+            console.error('Error finding board for reply:', err);
             res.status(500).send({ error: 'Something went wrong!' });
         });
     });
