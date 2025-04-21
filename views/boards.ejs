@@ -54,11 +54,13 @@
         <section class="thread-container id-<%= thread.id %> clearfix">
                 <span class="hideIcon"><img src="/assets/img/tools/expand.png"></span>
                 <div class="thread">
-                    <div class="threadThumbnail">
-                        <a class="threadImg-big" href="<%= thread.file %>">
-                            <img class="threadImg" src="<%= thread.file %>" title="Click to enlarge image.">
-                        </a>
-                    </div>
+                    <% if(thread.file && thread.file !== 'https://s.4cdn.org/image/fp/logo-transparent.png') { %>
+                        <div class="threadThumbnail">
+                            <a class="threadImg-big" href="<%= thread.file %>">
+                                <img class="threadImg" src="<%= thread.file %>" title="Click to enlarge image.">
+                            </a>
+                        </div>
+                    <% } %>
                     <span id="thread-title"><%= thread.subject %></span>
                     <span id="thread-author"><%= thread.author %></span>
                     <span id="thread-date"><%= thread.createdAt %></span>
@@ -75,7 +77,7 @@
                                     <span><i><%= reply.createAt %></i>&nbsp;</span>
                                     <span>No.<%= reply.id %>&nbsp;</span>
                                 </div>
-                                <% if(!(reply.file === null)) { %>
+                                <% if(reply.file && reply.file !== 'null' && reply.file !== 'https://s.4cdn.org/image/fp/logo-transparent.png') { %>
                                     <div class="threadThumbnail commentThumbnail">
                                         <a class="threadImg-big" href="<%= reply.file %>">
                                             <img class="threadImg" src="<%= reply.file %>" title="Click to enlarge image.">

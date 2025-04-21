@@ -34,6 +34,7 @@
 .board-banner{
     text-align: center;
     clear: both;
+    margin-bottom: 20px;
 }
 #banner-container{
     border: 1px solid #800;
@@ -41,13 +42,26 @@
     width: 300px;
     height: 100px;
     max-width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+#banner-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 100%;
+    width: 300px; /* Match container width */
+    object-fit: cover;
+    display: block;
 }
 #board-title{
     font-family: Tahoma,sans-serif;
     font-size: 28px;
     font-weight: bold;
     letter-spacing: -2px;
-    margin-top: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 #post-form-toggle{
     font-size: 22px;
