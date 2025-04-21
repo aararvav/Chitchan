@@ -1,5 +1,5 @@
 /**
- * Controllers (or routes) for home page only!
+ * Controllers (or Routes) for home page only!
  */
 
 module.exports = function(app){
