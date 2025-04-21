@@ -1,69 +1,29 @@
-const { Model, DataTypes } = require('sequelize');
+var sequelize = require("../config/index").getSequelize();
+var Sequelize = require('sequelize');
 
-class Comments extends Model {
-    static initModel(sequelize) {
-        return Comments.init({
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true
-            },
-            threadId: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                references: {
-                    model: 'threads',
-                    key: 'id'
-                }
-            },
-            author: {
-                type: DataTypes.STRING(150),
-                allowNull: false,
-                defaultValue: 'Anonymous',
-                validate: {
-                    len: [1, 150]
-                }
-            },
-            comment: {
-                type: DataTypes.TEXT,
-                allowNull: false,
-                validate: {
-                    notEmpty: true
-                }
-            },
-            file: {
-                type: DataTypes.STRING(255),
-                allowNull: true,
-                validate: {
-                    isUrl: true
-                }
-            },
-            isHidden: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false
-            },
-            ipAddress: {
-                type: DataTypes.STRING(45),
-                allowNull: true
-            },
-            userAgent: {
-                type: DataTypes.STRING(255),
-                allowNull: true
-            }
-        }, {
-            sequelize,
-            modelName: 'comments',
-            timestamps: true,
-            indexes: [
-                {
-                    fields: ['threadId']
-                },
-                {
-                    fields: ['createdAt']
-                }
-            ]
-        });
+var Comments = sequelize.define('comments', {
+    threadId: {
+        type: Sequelize.INTEGER(120),
+        field: 'thread_id',
+        allowNull: false
+    },
+    author: {
+        type: Sequelize.STRING(150),
+        field: 'author',
+        allowNull: false,
+        defaultValue: 'Anonymous'
+    },
+    comment: {
+        type: Sequelize.STRING(1234),
+        field: 'comment',
+        allowNull: false
+    },
+    file: {
+        type: Sequelize.STRING(150),
+        field: 'file'
     }
-}
 
+});
+
+Comments.sync();
 module.exports = Comments;

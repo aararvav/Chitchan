@@ -1,81 +1,35 @@
-const { Model, DataTypes } = require('sequelize');
+var sequelize = require("../config/index").getSequelize();
+var Sequelize = require('sequelize');
 
-class Threads extends Model {
-    static initModel(sequelize) {
-        return Threads.init({
-            id: {
-                type: DataTypes.INTEGER,
-                primaryKey: true,
-                autoIncrement: true
-            },
-            boardId: {
-                type: DataTypes.INTEGER,
-                allowNull: false,
-                references: {
-                    model: 'boards',
-                    key: 'id'
-                }
-            },
-            subject: {
-                type: DataTypes.STRING(150),
-                allowNull: false,
-                validate: {
-                    notEmpty: true,
-                    len: [1, 150]
-                }
-            },
-            author: {
-                type: DataTypes.STRING(150),
-                allowNull: false,
-                defaultValue: 'Anonymous',
-                validate: {
-                    len: [1, 150]
-                }
-            },
-            comment: {
-                type: DataTypes.TEXT,
-                allowNull: false,
-                validate: {
-                    notEmpty: true
-                }
-            },
-            file: {
-                type: DataTypes.STRING(255),
-                allowNull: true,
-                validate: {
-                    isUrl: true
-                }
-            },
-            isSticky: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false
-            },
-            isLocked: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false
-            },
-            viewCount: {
-                type: DataTypes.INTEGER,
-                defaultValue: 0
-            },
-            lastBump: {
-                type: DataTypes.DATE,
-                defaultValue: DataTypes.NOW
-            }
-        }, {
-            sequelize,
-            modelName: 'threads',
-            timestamps: true,
-            indexes: [
-                {
-                    fields: ['boardId']
-                },
-                {
-                    fields: ['lastBump']
-                }
-            ]
-        });
+var Threads = sequelize.define('threads', {
+    boardId: {
+        type: Sequelize.INTEGER(120),
+        field: 'board_id',
+        allowNull: false
+    },
+    subject: {
+        type: Sequelize.STRING(150),
+        field: 'subject',
+        allowNull: false
+    },
+    author: {
+        type: Sequelize.STRING(150),
+        field: 'author',
+        allowNull: false,
+        defaultValue: 'Anonymous'
+    },
+    comment: {
+        type: Sequelize.STRING(1234),
+        field: 'comment',
+        allowNull: false
+    },
+    file: {
+        type: Sequelize.STRING(150),
+        field: 'file',
+        allowNull: false
     }
-}
 
+});
+
+Threads.sync();
 module.exports = Threads;
