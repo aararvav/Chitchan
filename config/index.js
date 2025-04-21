@@ -1,12 +1,12 @@
 /*********
- *  This file will export important setup functions, including .env files and mysql connections.
+ *  This file will export Important setup functions, including .env files and mysql connections.
  *******/
 
 const Sequelize = require("sequelize");
 
 module.exports = {
     getSequelize: async function() {
-        // First, connect without database to create it if needed
+        // First, connect without Database to create it if needed
         const initSequelize = new Sequelize('mysql', process.env.MYSQL_USER, process.env.MYSQL_PASS, {
             host: process.env.HOST,
             dialect: 'mysql',
@@ -33,7 +33,7 @@ module.exports = {
                 }
             });
 
-            // Test the connection
+            // Test the Connection
             await sequelize.authenticate();
             console.log('Database connection established successfully.');
             
