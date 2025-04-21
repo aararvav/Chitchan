@@ -1,37 +1,48 @@
 /* 
- * Project Name: 4chan NodeJS
- * Written by Daniel <daniel.reguero@hotmail.com>
+ * Project Name: chitchan NodeJS
  */
+
+// Import required modules
 const express = require('express');
-const bodyParser = require('body-parser');
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+const bodyParser = require('body-parser');     // For parsing request bodies
+const helmet = require('helmet');              // For securing HTTP headers
+const cors = require('cors');                  // For enabling CORS
+const rateLimit = require('express-rate-limit'); // For limiting repeated requests
+require('dotenv').config();                    // Load environment variables from .env file
+
+// Import custom configuration and models
 var config = require("./config");
 var Boards = require("./models/boards");
 var Threads = require("./models/threads");
 var Comments = require("./models/comments");
 
-//Seed our database.
+// Seed our database with initial data
 console.log("Seeding ...");
 config.seedDatabase(Boards, Comments, Threads, app);
-//var middlewares = require("./middlewares");
-//'Custom' modules/variables.
+
+// Uncomment below to use custom middleware if needed
+// var middlewares = require("./middlewares");
+
+// Define custom variables/modules
 var port = process.env.PORT || 3000;
 var indexController = require("./controllers");
 var boardController = require("./controllers/boards");
 
-// Basic middleware
+// Serve static files from the /public directory under the /assets route
 app.use('/assets', express.static(__dirname + "/public"));
+
+// Parse incoming request bodies in JSON and URL-encoded format
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Set EJS as the view engine for rendering HTML pages
 app.set('view engine', 'ejs');
 
-//Call in our controllers/routes
+// Initialize routes/controllers
 indexController(app);
 boardController(app, Boards, Threads, Comments);
-//Listen on port specified.
+
+// Start server and listen on the specified port
 app.listen(port, function(){
     console.log("Website is running on http://" + process.env.HOST + ":" + port);
 });
