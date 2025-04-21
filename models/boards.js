@@ -1,18 +1,5 @@
-var sequelize = require("../config/index").getSequelize();
-var Sequelize = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
-var Boards = sequelize.define('boards', {
-    name: {
-        type: Sequelize.STRING(150),
-        field: 'name',
-        allowNull: false
-    },
-    slug: {
-        type: Sequelize.STRING(150),
-        field: 'slug',
-        allowNull: false
-    }
-});
+class Boards extends Model {}
 
-Boards.sync();
 module.exports = Boards;

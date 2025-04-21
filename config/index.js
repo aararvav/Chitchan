@@ -48,13 +48,6 @@ module.exports = {
         try {
             const { Boards, Comments, Threads } = models;
 
-            // Set up relationships
-            Threads.belongsTo(Boards, { foreignKey: 'boardId', constraints: true, as: 'board' });
-            Boards.hasMany(Threads, { foreignKey: 'boardId', constraints: true, as: 'threads' });
-
-            Comments.belongsTo(Threads, { foreignKey: 'threadId', constraints: true, as: 'thread' });
-            Threads.hasMany(Comments, { foreignKey: 'threadId', constraints: true, as: 'comments' });
-
             // Sync database with force option
             await sequelize.sync({ force: true });
             console.log('Database synced');
