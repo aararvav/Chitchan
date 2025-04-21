@@ -2,71 +2,144 @@
  *  This file will export important setup functions, including .env files and mysql connections.
  *******/
 
-var Sequelize = require("sequelize");
+const Sequelize = require("sequelize");
 
 module.exports = {
-
-    getSequelize: function(){
-        var seq = new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, process.env.MYSQL_PASS, {
+    getSequelize: async function() {
+        // First, connect without database to create it if needed
+        const initSequelize = new Sequelize('mysql', process.env.MYSQL_USER, process.env.MYSQL_PASS, {
             host: process.env.HOST,
             dialect: 'mysql',
-            pool: {
-                max: 5,
-                min: 0,
-                idle: 10000
-            }
+            logging: false
         });
-        return seq;
+
+        try {
+            // Create database if it doesn't exist
+            await initSequelize.query(`CREATE DATABASE IF NOT EXISTS ${process.env.MYSQL_DB};`);
+            await initSequelize.close();
+
+            // Now connect with the database
+            const sequelize = new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, process.env.MYSQL_PASS, {
+                host: process.env.HOST,
+                dialect: 'mysql',
+                pool: {
+                    max: 5,
+                    min: 0,
+                    idle: 10000
+                },
+                logging: console.log,
+                define: {
+                    timestamps: true
+                }
+            });
+
+            // Test the connection
+            await sequelize.authenticate();
+            console.log('Database connection established successfully.');
+            
+            return sequelize;
+        } catch (error) {
+            console.error('Error initializing database:', error);
+            throw error;
+        }
     },
 
-    seedDatabase: function(Boards, Comments, Threads, app){
-        var sequelize = this.getSequelize();
+    seedDatabase: async function(sequelize, models, app) {
+        try {
+            const { Boards, Comments, Threads } = models;
 
-        Threads.belongsTo(Boards, { foreignKey: 'board_id', constraints: true, as: 'boards' });
-        Boards.hasMany(Threads, { foreignKey: 'board_id', constraints: true, as: 'threads' });
+            // Set up relationships
+            Threads.belongsTo(Boards, { foreignKey: 'boardId', constraints: true, as: 'board' });
+            Boards.hasMany(Threads, { foreignKey: 'boardId', constraints: true, as: 'threads' });
 
-        Comments.belongsTo(Threads, { foreignKey: 'thread_id', constraints: true, as: 'threads' });
-        Threads.hasMany(Comments, { foreignKey: 'thread_id', constraints: true, as: 'comments' });
+            Comments.belongsTo(Threads, { foreignKey: 'threadId', constraints: true, as: 'thread' });
+            Threads.hasMany(Comments, { foreignKey: 'threadId', constraints: true, as: 'comments' });
 
-        sequelize.sync({force: true}).then(function(){
-            // Create multiple boards
-            return Promise.all([
-                Boards.findOrCreate({where: {id: 1}, defaults: {name: "Politically Incorrect", slug: "pol"}}),
-                Boards.findOrCreate({where: {id: 2}, defaults: {name: "Technology", slug: "g"}}),
-                Boards.findOrCreate({where: {id: 3}, defaults: {name: "Video Games", slug: "v"}}),
-                Boards.findOrCreate({where: {id: 4}, defaults: {name: "Anime & Manga", slug: "a"}}),
-                Boards.findOrCreate({where: {id: 5}, defaults: {name: "Random", slug: "b"}})
-            ]).then(function(boards){
-                // Create a thread in /pol/
-                return Threads.findOrCreate({where: {id: 1}, defaults:{
-                    boardId: boards[0][0].id,
-                    subject: "First /Pol/ thread",
-                    author: "HappyZombies",
-                    comment: "This is the comment, pretty nice",
-                    file: "https://s.4cdn.org/image/fp/logo-transparent.png"
-                }}).then(function(thread){
-                    // Create a comment in the thread
-                    return Comments.findOrCreate({where: {id: 1}, defaults:{
-                        threadId: thread[0].id,
-                        author: "420",
-                        comment: "This is reply to the thread"
-                    }}).then(function(){
-                        // Update global variables
-                        return Boards.findAll().then(function(allBoards){
-                            app.locals.boards = allBoards;
-                        }).catch(function(err){
-                            console.log("DB Error "+err);
-                            app.locals.boards = [{}];
-                        });
-                    }).catch(function(err){
-                        console.log("DB Error: " + err);
-                    });
-                }).catch(function(err){
-                    console.log("DB Error: " + err);
+            // Sync database with force option
+            await sequelize.sync({ force: true });
+            console.log('Database synced');
+
+            // Create boards
+            const boardsData = [
+                {
+                    id: 1,
+                    name: "Politically Incorrect",
+                    slug: "pol",
+                    description: "Political discussion and news",
+                    rules: "Keep it civil. No personal attacks.",
+                    isNsfw: false
+                },
+                {
+                    id: 2,
+                    name: "Technology",
+                    slug: "g",
+                    description: "Technology and computing discussion",
+                    rules: "Stay on topic. No spam.",
+                    isNsfw: false
+                },
+                {
+                    id: 3,
+                    name: "Video Games",
+                    slug: "v",
+                    description: "Video game discussion and news",
+                    rules: "Keep it gaming related.",
+                    isNsfw: false
+                },
+                {
+                    id: 4,
+                    name: "Anime & Manga",
+                    slug: "a",
+                    description: "Anime and manga discussion",
+                    rules: "Keep it anime/manga related.",
+                    isNsfw: true
+                },
+                {
+                    id: 5,
+                    name: "Random",
+                    slug: "b",
+                    description: "Random discussion",
+                    rules: "Anything goes (within site rules).",
+                    isNsfw: true
+                }
+            ];
+
+            // Create all boards
+            for (const boardData of boardsData) {
+                await Boards.create(boardData);
+            }
+
+            // Create a sample thread
+            const board = await Boards.findByPk(1);
+            if (board) {
+                const thread = await Threads.create({
+                    boardId: board.id,
+                    subject: "Welcome to Chitchan",
+                    author: "Admin",
+                    comment: "This is the first thread. Welcome to Chitchan!",
+                    file: "https://s.4cdn.org/image/fp/logo-transparent.png",
+                    isSticky: true,
+                    isLocked: false,
+                    viewCount: 0
                 });
-            }).catch(function(err){
-                console.log("DB Error: " + err);
-            });
-        });
+
+                // Create a sample comment
+                await Comments.create({
+                    threadId: thread.id,
+                    author: "Mod",
+                    comment: "First reply to welcome thread",
+                    isHidden: false
+                });
+            }
+
+            // Update global boards variable
+            const allBoards = await Boards.findAll();
+            app.locals.boards = allBoards;
+            console.log('Database seeded successfully');
+
+        } catch (error) {
+            console.error('Error seeding database:', error);
+            app.locals.boards = [];
+            throw error;
+        }
     }
 }
