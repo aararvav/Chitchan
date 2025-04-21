@@ -91,6 +91,22 @@ async function initializeApp() {
                 type: DataTypes.STRING(255),
                 allowNull: true
             },
+            thumbnail: {
+                type: DataTypes.STRING(255),
+                allowNull: true
+            },
+            fileSize: {
+                type: DataTypes.INTEGER,
+                allowNull: true
+            },
+            fileWidth: {
+                type: DataTypes.INTEGER,
+                allowNull: true
+            },
+            fileHeight: {
+                type: DataTypes.INTEGER,
+                allowNull: true
+            },
             isSticky: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
@@ -130,6 +146,26 @@ async function initializeApp() {
             comment: {
                 type: DataTypes.TEXT,
                 allowNull: false
+            },
+            file: {
+                type: DataTypes.STRING(255),
+                allowNull: true
+            },
+            thumbnail: {
+                type: DataTypes.STRING(255),
+                allowNull: true
+            },
+            fileSize: {
+                type: DataTypes.INTEGER,
+                allowNull: true
+            },
+            fileWidth: {
+                type: DataTypes.INTEGER,
+                allowNull: true
+            },
+            fileHeight: {
+                type: DataTypes.INTEGER,
+                allowNull: true
             },
             isHidden: {
                 type: DataTypes.BOOLEAN,
